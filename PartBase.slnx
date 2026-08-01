@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/PartBase/">
+    <File Path="docker-compose.yml" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="PartBase.Api/PartBase.Api.csproj" Id="c61d0ac0-f59f-4b17-8f17-99d46ef7fa45" />
     <Project Path="PartBase.Application/PartBase.Application.csproj" Id="21d1bac3-37cd-4556-a867-d8d4c4b0a554" />
