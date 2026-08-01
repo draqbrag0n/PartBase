@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="PartBase.Api/PartBase.Api.csproj" Id="c61d0ac0-f59f-4b17-8f17-99d46ef7fa45" />
+    <Project Path="PartBase.Application/PartBase.Application.csproj" Id="21d1bac3-37cd-4556-a867-d8d4c4b0a554" />
+    <Project Path="PartBase.Domain/PartBase.Domain.csproj" Id="374689a9-da81-4aac-ab3d-9347f7ebcd80" />
+    <Project Path="PartBase.Infrastructure/PartBase.Infrastructure.csproj" Id="330e33db-09b3-43d8-ba5f-acd4d830ae67" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="PartBase.UnitTests/PartBase.UnitTests.csproj" Id="515e39d3-a57d-4797-86f6-4acfffe1c632" />
+  </Folder>
+</Solution>
