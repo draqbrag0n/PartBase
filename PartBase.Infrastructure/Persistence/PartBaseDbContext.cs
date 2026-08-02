@@ -11,8 +11,14 @@ public class PartBaseDbContext : DbContext
     }
 
     public DbSet<Component> Components => Set<Component>();
-
     public DbSet<Manufacturer> Manufacturers => Set<Manufacturer>();
-
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<User> Users => Set<User>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(PartBaseDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
 }

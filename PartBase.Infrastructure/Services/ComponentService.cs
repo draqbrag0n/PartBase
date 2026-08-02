@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PartBase.Application.DTOs;
 using PartBase.Application.DTOs.Components;
 using PartBase.Application.Interfaces;
@@ -10,16 +11,17 @@ namespace PartBase.Infrastructure.Services;
 public class ComponentService : IComponentService
 {
     private readonly PartBaseDbContext _context;
+    private readonly ILogger<ComponentService> _logger;
 
-    public ComponentService(PartBaseDbContext context)
+    public ComponentService(
+        PartBaseDbContext context,
+        ILogger<ComponentService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
-    public async Task<PagedResult<ComponentDto>> GetAllAsync(
-        string? search,
-        int page,
-        int pageSize)
+    public async Task<PagedResult<ComponentDto>> GetAllAsync(string? search,int page,int pageSize)
     {
         var query = _context.Components
             .Include(x => x.Manufacturer)
@@ -135,5 +137,31 @@ public class ComponentService : IComponentService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<List<ComponentDto>> SearchAsync(string? search)
+    {
+        var query = _context.Components.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(x =>
+                x.PartNumber.Contains(search) ||
+                x.Description.Contains(search));
+        }
+
+        return await query
+            .OrderBy(x => x.PartNumber)
+            .Select(x => new ComponentDto
+            {
+                Id = x.Id,
+                PartNumber = x.PartNumber,
+                Description = x.Description,
+                Package = x.Package,
+                DatasheetUrl = x.DatasheetUrl
+            })
+            .ToListAsync();
     }
 }
