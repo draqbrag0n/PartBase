@@ -10,7 +10,11 @@
 
         public Guid ManufacturerId { get; private set; }
 
+        public Manufacturer Manufacturer { get; private set; } = null!;
+
         public Guid CategoryId { get; private set; }
+
+        public Category Category { get; private set; } = null!;
 
         public string Package { get; private set; } = string.Empty;
 
@@ -37,4 +41,20 @@
             DatasheetUrl = datasheetUrl;
             CreatedAt = DateTime.UtcNow;
         }
+
+    public void Update(
+    string partNumber,
+    string description,
+    Guid manufacturerId,
+    Guid categoryId,
+    string package,
+    string datasheetUrl)
+    {
+        PartNumber = partNumber;
+        Description = description;
+        ManufacturerId = manufacturerId;
+        CategoryId = categoryId;
+        Package = package;
+        DatasheetUrl = datasheetUrl;
     }
+}

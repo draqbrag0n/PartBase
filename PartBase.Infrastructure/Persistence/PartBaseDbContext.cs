@@ -11,4 +11,8 @@ public class PartBaseDbContext : DbContext
     }
 
     public DbSet<Component> Components => Set<Component>();
+
+    public DbSet<Manufacturer> Manufacturers => Set<Manufacturer>();
+
+    public DbSet<Category> Categories => Set<Category>();
 }
