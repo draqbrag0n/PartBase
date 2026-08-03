@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PartBase.Application.DTOs;
+using PartBase.Application.Common;
 using PartBase.Application.DTOs.Components;
 using PartBase.Application.Interfaces;
 using PartBase.Domain.Entities;
@@ -23,7 +23,18 @@ public class ComponentService : IComponentService
 
     public async Task<PagedResult<ComponentDto>> GetAllAsync(string? search,int page,int pageSize)
     {
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize < 1 ? 20 : pageSize;
+        pageSize = pageSize > 100 ? 100 : pageSize;
+
+        _logger.LogInformation(
+        "Listing components. Search: {Search}, Page: {Page}, PageSize: {PageSize}",
+        search,
+        page,
+        pageSize);
+
         var query = _context.Components
+            .AsNoTracking()
             .Include(x => x.Manufacturer)
             .Include(x => x.Category)
             .AsQueryable();
@@ -65,6 +76,7 @@ public class ComponentService : IComponentService
     public async Task<ComponentDto?> GetByIdAsync(Guid id)
     {
         return await _context.Components
+            .AsNoTracking()
             .Include(x => x.Manufacturer)
             .Include(x => x.Category)
             .Where(x => x.Id == id)
@@ -83,6 +95,8 @@ public class ComponentService : IComponentService
 
     public async Task<ComponentDto> CreateAsync(CreateComponentRequest request)
     {
+        _logger.LogInformation("Creating component {PartNumber}", request.PartNumber);
+
         var component = new Component(
             request.PartNumber,
             request.Description,
@@ -137,31 +151,5 @@ public class ComponentService : IComponentService
         await _context.SaveChangesAsync();
 
         return true;
-    }
-
-    public async Task<List<ComponentDto>> SearchAsync(string? search)
-    {
-        var query = _context.Components.AsNoTracking();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            search = search.Trim();
-
-            query = query.Where(x =>
-                x.PartNumber.Contains(search) ||
-                x.Description.Contains(search));
-        }
-
-        return await query
-            .OrderBy(x => x.PartNumber)
-            .Select(x => new ComponentDto
-            {
-                Id = x.Id,
-                PartNumber = x.PartNumber,
-                Description = x.Description,
-                Package = x.Package,
-                DatasheetUrl = x.DatasheetUrl
-            })
-            .ToListAsync();
     }
 }

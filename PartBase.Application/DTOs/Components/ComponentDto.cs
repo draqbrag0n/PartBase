@@ -1,4 +1,4 @@
-﻿namespace PartBase.Application.DTOs;
+﻿namespace PartBase.Application.DTOs.Components;
 
 public class ComponentDto
 {

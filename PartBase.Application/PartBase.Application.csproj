@@ -15,4 +15,12 @@
     <ProjectReference Include="..\PartBase.Domain\PartBase.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Components\Commands\" />
+    <Folder Include="Features\Components\DTOs\" />
+    <Folder Include="Features\Components\Handlers\" />
+    <Folder Include="Features\Components\Queries\" />
+    <Folder Include="Features\Components\Validators\" />
+  </ItemGroup>
+
 </Project>
