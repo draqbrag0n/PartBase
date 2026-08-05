@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PartBase.Application.Common;
 using PartBase.Application.Interfaces;
-using PartBase.Domain.Entities;
 using PartBase.Infrastructure.Persistence;
 
 namespace PartBase.Infrastructure.Services;
@@ -14,11 +14,16 @@ public class CategoryService : ICategoryService
         _context = context;
     }
 
-    public async Task<List<Category>> GetAllAsync()
+    public async Task<List<LookupDto>> GetAllAsync()
     {
         return await _context.Categories
             .AsNoTracking()
             .OrderBy(x => x.Name)
+            .Select(x => new LookupDto
+            {
+                Id = x.Id,
+                Name = x.Name
+            })
             .ToListAsync();
     }
 }

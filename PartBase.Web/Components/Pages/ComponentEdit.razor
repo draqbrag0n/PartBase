@@ -1,0 +1,128 @@
+﻿@page "/components/edit/{Id:guid}"
+
+@using PartBase.Application.DTOs.Components
+@using PartBase.Application.Common
+@using PartBase.Web.Services
+
+@inject ComponentApiService ComponentService
+@inject LookupApiService LookupService
+@inject NavigationManager Navigation
+
+<h3>Komponent Düzenle</h3>
+
+@if (_loading)
+{
+    <Loading />
+}
+else
+{
+    <EditForm Model="_model" OnValidSubmit="Save">
+
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Part Number</label>
+            <InputText class="form-control"
+                       @bind-Value="_model.PartNumber" />
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <InputText class="form-control"
+                       @bind-Value="_model.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label>Manufacturer</label>
+
+            <InputSelect class="form-select"
+                         @bind-Value="_model.ManufacturerId">
+
+                @foreach (var item in _manufacturers)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label>Category</label>
+
+            <InputSelect class="form-select"
+                         @bind-Value="_model.CategoryId">
+
+                @foreach (var item in _categories)
+                {
+                    <option value="@item.Id">@item.Name</option>
+                }
+
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label>Package</label>
+            <InputText class="form-control"
+                       @bind-Value="_model.Package" />
+        </div>
+
+        <div class="mb-3">
+            <label>Datasheet Url</label>
+            <InputText class="form-control"
+                       @bind-Value="_model.DatasheetUrl" />
+        </div>
+
+        <button class="btn btn-primary">
+            Güncelle
+        </button>
+
+    </EditForm>
+}
+
+@code
+{
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool _loading = true;
+
+    private CreateComponentRequest _model = new();
+
+    private List<LookupDto> _manufacturers = new();
+
+    private List<LookupDto> _categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _manufacturers = await LookupService.GetManufacturersAsync();
+        _categories = await LookupService.GetCategoriesAsync();
+
+        var component = await ComponentService.GetByIdAsync(Id);
+
+        if (component != null)
+        {
+            _model = new CreateComponentRequest
+            {
+                PartNumber = component.PartNumber,
+                Description = component.Description,
+                ManufacturerId = component.ManufacturerId,
+                CategoryId = component.CategoryId,
+                Package = component.Package,
+                DatasheetUrl = component.DatasheetUrl
+            };
+        }
+
+        _loading = false;
+    }
+
+    private async Task Save()
+    {
+        var success = await ComponentService.UpdateAsync(Id, _model);
+
+        if (success)
+        {
+            Navigation.NavigateTo("/components");
+        }
+    }
+}

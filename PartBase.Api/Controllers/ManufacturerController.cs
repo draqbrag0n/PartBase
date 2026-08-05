@@ -4,7 +4,7 @@ using PartBase.Application.Interfaces;
 namespace PartBase.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/manufacturers")]
 public class ManufacturersController : ControllerBase
 {
     private readonly IManufacturerService _service;

@@ -1,0 +1,168 @@
+﻿@page "/dashboard"
+
+@using PartBase.Application.DTOs.Dashboard
+@using PartBase.Web.Services
+
+@inject DashboardApiService DashboardService
+
+<h2>📊 PartBase Dashboard</h2>
+
+<p class="text-muted">
+    Elektronik komponent yönetim sistemi
+</p>
+
+<hr />
+
+@if (_dashboard == null)
+{
+    <div class="alert alert-info">
+        Dashboard yükleniyor...
+    </div>
+}
+else
+{
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card text-bg-primary shadow">
+
+                <div class="card-body text-center">
+
+                    <h1>@_dashboard.TotalComponents</h1>
+
+                    <h5>Toplam Komponent</h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card text-bg-success shadow">
+
+                <div class="card-body text-center">
+
+                    <h1>@_dashboard.TotalManufacturers</h1>
+
+                    <h5>Üretici</h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card text-bg-warning shadow">
+
+                <div class="card-body text-center">
+
+                    <h1>@_dashboard.TotalCategories</h1>
+
+                    <h5>Kategori</h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4 mb-4">
+
+        <a class="btn btn-success me-2"
+           href="/components/create">
+
+            + Yeni Komponent
+
+        </a>
+
+        <a class="btn btn-primary"
+           href="/components">
+
+            Komponentleri Gör
+
+        </a>
+
+    </div>
+
+    <hr />
+
+    <h4>Son Eklenen Komponentler</h4>
+
+    @if (!_dashboard.LatestComponents.Any())
+    {
+        <div class="alert alert-warning">
+            Henüz komponent bulunmuyor.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Part Number</th>
+
+                    <th>Manufacturer</th>
+
+                    <th>Category</th>
+
+                    <th>Package</th>
+
+                    <th></th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in _dashboard.LatestComponents)
+                {
+                    <tr>
+
+                        <td>@item.PartNumber</td>
+
+                        <td>@item.Manufacturer</td>
+
+                        <td>@item.Category</td>
+
+                        <td>@item.Package</td>
+
+                        <td>
+
+                            <a class="btn btn-outline-primary btn-sm"
+                               href="/components/@item.Id">
+
+                                Detay
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    }
+}
+
+@code
+{
+    private DashboardDto? _dashboard;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _dashboard = await DashboardService.GetAsync();
+    }
+}

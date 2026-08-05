@@ -1,8 +1,8 @@
-﻿using PartBase.Domain.Entities;
+﻿using PartBase.Application.Common;
 
 namespace PartBase.Application.Interfaces;
 
 public interface IManufacturerService
 {
-    Task<List<Manufacturer>> GetAllAsync();
+    Task<List<LookupDto>> GetAllAsync();
 }

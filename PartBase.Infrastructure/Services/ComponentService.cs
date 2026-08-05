@@ -57,8 +57,13 @@ public class ComponentService : IComponentService
                 Id = x.Id,
                 PartNumber = x.PartNumber,
                 Description = x.Description,
+
+                ManufacturerId = x.ManufacturerId,
                 Manufacturer = x.Manufacturer.Name,
+
+                CategoryId = x.CategoryId,
                 Category = x.Category.Name,
+
                 Package = x.Package,
                 DatasheetUrl = x.DatasheetUrl
             })
@@ -85,8 +90,13 @@ public class ComponentService : IComponentService
                 Id = x.Id,
                 PartNumber = x.PartNumber,
                 Description = x.Description,
+
+                ManufacturerId = x.ManufacturerId,
                 Manufacturer = x.Manufacturer.Name,
+
+                CategoryId = x.CategoryId,
                 Category = x.Category.Name,
+
                 Package = x.Package,
                 DatasheetUrl = x.DatasheetUrl
             })

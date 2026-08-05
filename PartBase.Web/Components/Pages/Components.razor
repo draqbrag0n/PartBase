@@ -1,0 +1,127 @@
+﻿@page "/components"
+
+@using PartBase.Application.DTOs.Components
+@using PartBase.Application.Common
+@using PartBase.Web.Services
+
+@inject ComponentApiService ComponentService
+
+<h3>Components</h3>
+
+@if (_result == null)
+{
+    <p>Yükleniyor...</p>
+}
+else
+{
+    <div class="row mb-3">
+
+        <div class="col-md-6">
+            <input class="form-control"
+                   @bind="_search"
+                   placeholder="Part Number veya açıklama ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary"
+                    @onclick="Search">
+                Ara
+            </button>
+        </div>
+
+        <div class="col-md-2">
+            <a class="btn btn-success"
+               href="/components/create">
+                + Yeni Komponent
+            </a>
+        </div>
+
+    </div>
+
+    @if (!_result.Items.Any())
+    {
+        <div class="alert alert-warning">
+            Kayıt bulunamadı.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+
+            @foreach (var item in _result.Items)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+
+                    <ComponentCard Component="item" />
+
+                </div>
+            }
+
+        </div>
+
+        <div class="mt-4 d-flex align-items-center gap-3">
+
+            <button class="btn btn-secondary"
+                    @onclick="PreviousPage"
+                    disabled="@(_page == 1)">
+                Önceki
+            </button>
+
+            <span>
+                Sayfa @_page / @_result.TotalPages
+            </span>
+
+            <button class="btn btn-primary"
+                    @onclick="NextPage"
+                    disabled="@(_page >= _result.TotalPages)">
+                Sonraki
+            </button>
+
+        </div>
+    }
+}
+
+@code
+{
+    private PagedResult<ComponentDto>? _result;
+    private string? _search;
+    private int _page = 1;
+    private const int _pageSize = 20;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadComponents();
+    }
+
+    private async Task LoadComponents()
+    {
+        _result = await ComponentService.GetComponentsAsync(
+            _search,
+            _page,
+            _pageSize);
+    }
+
+    private async Task Search()
+    {
+        _page = 1;
+        await LoadComponents();
+    }
+
+    private async Task NextPage()
+    {
+        if (_result != null && _page < _result.TotalPages)
+        {
+            _page++;
+            await LoadComponents();
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_page > 1)
+        {
+            _page--;
+            await LoadComponents();
+        }
+    }
+}

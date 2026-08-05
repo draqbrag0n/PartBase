@@ -25,6 +25,7 @@ builder.Services.AddDbContext<PartBaseDbContext>(options =>
 builder.Services.AddScoped<IComponentService, ComponentService>();
 builder.Services.AddScoped<IManufacturerService, ManufacturerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // FluentValidation için gerekli olan validator'ları ekliyoruz
 

@@ -8,7 +8,11 @@ public class ComponentDto
 
     public string Description { get; set; } = string.Empty;
 
+    public Guid ManufacturerId { get; set; }
+
     public string Manufacturer { get; set; } = string.Empty;
+
+    public Guid CategoryId { get; set; }
 
     public string Category { get; set; } = string.Empty;
 

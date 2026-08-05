@@ -1,0 +1,75 @@
+﻿@page "/components/{Id:guid}"
+
+@using PartBase.Application.DTOs.Components
+@using PartBase.Web.Services
+
+@inject ComponentApiService ComponentService
+
+<h3>Component Detail</h3>
+
+@if (_component == null)
+{
+    <p>Yükleniyor...</p>
+}
+else
+{
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <h2>@_component.PartNumber</h2>
+
+            <hr />
+
+            <p>
+                <strong>Description</strong><br />
+                @_component.Description
+            </p>
+
+            <p>
+                <strong>Manufacturer</strong><br />
+                @_component.Manufacturer
+            </p>
+
+            <p>
+                <strong>Category</strong><br />
+                @_component.Category
+            </p>
+
+            <p>
+                <strong>Package</strong><br />
+                @_component.Package
+            </p>
+
+            <div class="mt-3 d-flex gap-2">
+
+                <a class="btn btn-secondary"
+                   href="/components">
+                    ← Listeye Dön
+                </a>
+
+                <a class="btn btn-primary"
+                   href="@_component.DatasheetUrl"
+                   target="_blank">
+                    Datasheet
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private ComponentDto? _component;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _component = await ComponentService.GetByIdAsync(Id);
+    }
+}

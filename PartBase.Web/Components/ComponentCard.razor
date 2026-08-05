@@ -1,0 +1,89 @@
+﻿@using PartBase.Web.Services
+
+@inject ComponentApiService ComponentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+@using PartBase.Application.DTOs.Components
+
+
+<div class="card shadow-sm h-100">
+
+    <div class="card-body">
+
+        <h5 class="card-title">
+            @Component.PartNumber
+        </h5>
+
+        <p class="card-text">
+            @Component.Description
+        </p>
+
+        <hr />
+
+        <p>
+            <strong>Manufacturer</strong><br />
+            @Component.Manufacturer
+        </p>
+
+        <p>
+            <strong>Category</strong><br />
+            @Component.Category
+        </p>
+
+        <p>
+            <strong>Package</strong><br />
+            @Component.Package
+        </p>
+
+    </div>
+
+    <div class="card-footer d-flex gap-2 flex-wrap">
+
+        <a class="btn btn-success btn-sm"
+           href="/components/@Component.Id">
+            Detay
+        </a>
+
+        <a class="btn btn-warning btn-sm"
+           href="/components/edit/@Component.Id">
+            Düzenle
+        </a>
+
+        <button class="btn btn-danger btn-sm"
+                @onclick="Delete">
+            Sil
+        </button>
+
+        <a class="btn btn-outline-primary btn-sm"
+           href="@Component.DatasheetUrl"
+           target="_blank">
+            Datasheet
+        </a>
+
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public ComponentDto Component { get; set; } = default!;
+
+    private async Task Delete()
+    {
+        var confirm = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"{Component.PartNumber} silinsin mi?");
+
+        if (!confirm)
+            return;
+
+        var success = await ComponentService.DeleteAsync(Component.Id);
+
+        if (success)
+        {
+            Navigation.NavigateTo("/components", true);
+        }
+    }
+}
