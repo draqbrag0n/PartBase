@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PartBase.Domain.Entities;
+using PartBase.Infrastructure.Identity;
 
 namespace PartBase.Infrastructure.Persistence;
 
-public class PartBaseDbContext : DbContext
+public class PartBaseDbContext : IdentityDbContext<ApplicationUser>
 {
     public PartBaseDbContext(DbContextOptions<PartBaseDbContext> options)
         : base(options)

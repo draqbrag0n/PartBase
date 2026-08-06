@@ -1,10 +1,12 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PartBase.Api.Middleware;
 using PartBase.Application.Interfaces;
 using PartBase.Application.Validators;
+using PartBase.Infrastructure.Identity;
 using PartBase.Infrastructure.Persistence;
 using PartBase.Infrastructure.Persistence.Seed;
 using PartBase.Infrastructure.Services;
@@ -20,6 +22,25 @@ builder.Services.AddOpenApi("v1");
 // PostgreSql bağlantısı için gerekli olan DbContext'i ekliyoruz
 builder.Services.AddDbContext<PartBaseDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Identity için gerekli olan servisleri ekliyoruz
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<PartBaseDbContext>()
+    .AddDefaultTokenProviders();
+
+// Identity için gerekli olan servisleri ekliyoruz ve şifre politikalarını yapılandırıyoruz
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<PartBaseDbContext>()
+.AddDefaultTokenProviders();
 
 // Servisleri konteynara ekliyoruz
 builder.Services.AddScoped<IComponentService, ComponentService>();
@@ -77,6 +98,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Veritabanı migrasyonlarını uyguluyoruz ve başlangıç verilerini ekliyoruz
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PartBaseDbContext>();
@@ -84,6 +106,14 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 
     await SeedData.InitializeAsync(db);
+}
+
+// Identity için gerekli olan rollerin veritabanına eklenmesini sağlıyoruz
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await IdentitySeeder.SeedRolesAsync(roleManager);
 }
 
 app.Run();
