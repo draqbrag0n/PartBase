@@ -4,7 +4,8 @@ namespace PartBase.Infrastructure.Identity;
 
 public static class IdentitySeeder
 {
-    public static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+    public static async Task SeedRolesAsync(
+        RoleManager<IdentityRole> roleManager)
     {
         string[] roles =
         {
@@ -16,7 +17,14 @@ public static class IdentitySeeder
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                var result = await roleManager.CreateAsync(
+                    new IdentityRole(role));
+
+                if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        $"Rol oluşturulamadı: {role}");
+                }
             }
         }
     }

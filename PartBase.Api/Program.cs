@@ -13,50 +13,79 @@ using PartBase.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ----------------------------------------------------
+// Controllers
+// ----------------------------------------------------
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+
+// ----------------------------------------------------
+// OpenAPI
+// ----------------------------------------------------
+
 builder.Services.AddOpenApi("v1");
 
-// PostgreSql bağlantısı için gerekli olan DbContext'i ekliyoruz
-builder.Services.AddDbContext<PartBaseDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity için gerekli olan servisleri ekliyoruz
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+// ----------------------------------------------------
+// Database
+// ----------------------------------------------------
+
+builder.Services.AddDbContext<PartBaseDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+// ----------------------------------------------------
+// Identity
+// ----------------------------------------------------
+// Identity SADECE BİR KEZ kaydediliyor.
+
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+
+        options.User.RequireUniqueEmail = true;
+    })
     .AddEntityFrameworkStores<PartBaseDbContext>()
     .AddDefaultTokenProviders();
 
-// Identity için gerekli olan servisleri ekliyoruz ve şifre politikalarını yapılandırıyoruz
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequiredLength = 8;
-    options.Password.RequireDigit = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
 
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<PartBaseDbContext>()
-.AddDefaultTokenProviders();
+// ----------------------------------------------------
+// Application Services
+// ----------------------------------------------------
 
-// Servisleri konteynara ekliyoruz
 builder.Services.AddScoped<IComponentService, ComponentService>();
 builder.Services.AddScoped<IManufacturerService, ManufacturerService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
-// FluentValidation için gerekli olan validator'ları ekliyoruz
+
+// ----------------------------------------------------
+// FluentValidation
+// ----------------------------------------------------
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateComponentRequestValidator>();
 
-// Health Check ekliyoruz
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+
+// ----------------------------------------------------
+// Health Check
+// ----------------------------------------------------
+
 builder.Services.AddHealthChecks();
 
-// Model validation hatalarını özelleştirmek için ApiBehaviorOptions'ı yapılandırıyoruz
+
+// ----------------------------------------------------
+// API Validation
+// ----------------------------------------------------
+
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -66,7 +95,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
             .Select(x => new
             {
                 Field = x.Key,
-                Errors = x.Value!.Errors.Select(e => e.ErrorMessage)
+                Errors = x.Value!.Errors
+                    .Select(e => e.ErrorMessage)
             });
 
         return new BadRequestObjectResult(new
@@ -78,42 +108,86 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+
 var app = builder.Build();
 
-// Middleware'ı ekliyoruz
+
+// ----------------------------------------------------
+// Middleware
+// ----------------------------------------------------
+
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Health Check endpoint'ini ekliyoruz
+
+// ----------------------------------------------------
+// Health Check
+// ----------------------------------------------------
+
 app.MapHealthChecks("/health");
 
-// Configure the HTTP request pipeline.
+
+// ----------------------------------------------------
+// OpenAPI
+// ----------------------------------------------------
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
+
+// ----------------------------------------------------
+// HTTPS
+// ----------------------------------------------------
+
 app.UseHttpsRedirection();
+
+
+// ----------------------------------------------------
+// Authentication / Authorization
+// ----------------------------------------------------
+
+// JWT'yi henüz eklemedik.
+// Identity'nin cookie authentication altyapısı için:
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
+
+// ----------------------------------------------------
+// Controllers
+// ----------------------------------------------------
+
 app.MapControllers();
 
-// Veritabanı migrasyonlarını uyguluyoruz ve başlangıç verilerini ekliyoruz
+
+// ----------------------------------------------------
+// Database Migration + Seed
+// ----------------------------------------------------
+
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<PartBaseDbContext>();
+    var db = scope.ServiceProvider
+        .GetRequiredService<PartBaseDbContext>();
 
     await db.Database.MigrateAsync();
 
     await SeedData.InitializeAsync(db);
 }
 
-// Identity için gerekli olan rollerin veritabanına eklenmesini sağlıyoruz
+
+// ----------------------------------------------------
+// Identity Role Seed
+// ----------------------------------------------------
+
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
 
     await IdentitySeeder.SeedRolesAsync(roleManager);
 }
+
 
 app.Run();
